@@ -37,6 +37,7 @@ run_jiandu.py
 # Local data files (required for app, not tracked in git)
 参考咨询书库馆藏清单.xlsx
 馆标黑版.png
+.env
 
 # Word temp files
 ~$*.docx
