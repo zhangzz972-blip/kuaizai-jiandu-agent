@@ -1,0 +1,38 @@
+# Output
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+*.tmp
+temp_*
+excel_preview.txt
+gen_script.py
+
+# Old scripts (replaced by app.py + jiandu_deepseek.py)
+generate_recommendations.py
+run_agent.ps1
+jiandu-agent.agent.yaml
+jiandu-environment.env.yaml
+setup_jiandu.ps1
+setup_jiandu.py
+run_jiandu.py
+
+# Word temp files
+~$*.docx

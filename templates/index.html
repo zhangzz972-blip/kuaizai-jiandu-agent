@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快哉荐读agent v1.0</title>
+<style>
+:root {
+  --bg: #f5f0e8; --card: #fdfbf7; --primary: #7a5230; --primary-hover: #5d3d22;
+  --text: #3c3732; --muted: #8c8278; --light-muted: #b8b0a6;
+  --border: #e6dfd3; --accent: #ebdcc8; --accent2: #d4b896;
+  --green: #5c7c5e; --green-hover: #476148;
+  --danger: #b85450; --radius: 10px;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.04);
+  --shadow: 0 2px 16px rgba(0,0,0,.05);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,.07);
+  --font-title: "Noto Serif SC","华文楷体","宋体",serif;
+  --font-body: "Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;}
+
+.container{max-width:960px;margin:0 auto;padding:20px 20px 40px;}
+
+/* ── Header ── */
+.header{text-align:center;padding:36px 0 28px;position:relative;}
+.header::after{content:'';display:block;width:60px;height:2px;background:var(--accent2);
+  margin:20px auto 0;border-radius:1px;}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:6px;}
+.logo-row img{height:52px;width:auto;opacity:.92;}
+.header h1{font-family:var(--font-title);font-size:30px;color:var(--primary);font-weight:600;letter-spacing:2px;}
+.header .tagline{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:6px;}
+.header .tagline span{font-size:13px;color:var(--muted);letter-spacing:1px;}
+.header .tagline .dot{width:4px;height:4px;border-radius:50%;background:var(--accent2);}
+
+/* ── Steps Progress ── */
+.steps-indicator{display:flex;justify-content:center;gap:0;margin-bottom:24px;}
+.steps-indicator .si-item{display:flex;align-items:center;gap:0;}
+.steps-indicator .si-num{width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  background:#fff;color:var(--muted);border:2px solid var(--border);transition:all .3s;}
+.steps-indicator .si-item.active .si-num{background:var(--primary);color:#fff;border-color:var(--primary);}
+.steps-indicator .si-item.done .si-num{background:var(--green);color:#fff;border-color:var(--green);}
+.steps-indicator .si-label{margin-left:8px;font-size:13px;color:var(--muted);white-space:nowrap;transition:color .3s;}
+.steps-indicator .si-item.active .si-label,
+.steps-indicator .si-item.done .si-label{color:var(--text);font-weight:600;}
+.steps-indicator .si-line{width:40px;height:2px;background:var(--border);margin:0 8px;transition:background .3s;}
+.steps-indicator .si-item.done .si-line{background:var(--green);}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:28px 30px;margin-bottom:20px;transition:box-shadow .2s;}
+.card:hover{box-shadow:var(--shadow-lg);}
+.card-header{font-family:var(--font-title);font-size:20px;font-weight:600;color:var(--primary);
+  margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:1px solid var(--accent);}
+.card-header .icon{font-size:22px;}
+
+/* ── Form ── */
+.form-row{display:flex;gap:10px;align-items:center;}
+.form-row input[type=text]{flex:1;padding:11px 18px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:15px;outline:none;transition:border .2s,box-shadow .2s;font-family:inherit;background:#fefefd;}
+.form-row input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,82,48,.08);}
+.form-row select{padding:11px 36px 11px 14px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:15px;outline:none;cursor:pointer;appearance:none;
+  background:#fefefd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238c8278' fill='none' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center;
+  font-family:inherit;transition:border .2s;}
+.form-row select:focus{border-color:var(--primary);}
+
+/* ── Buttons ── */
+.btn{padding:10px 22px;border:none;border-radius:8px;font-size:14px;cursor:pointer;
+  font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px;
+  font-family:inherit;letter-spacing:.3px;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-hover);box-shadow:0 2px 8px rgba(122,82,48,.25);}
+.btn-outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary);}
+.btn-outline:hover{background:rgba(122,82,48,.04);}
+.btn-success{background:var(--green);color:#fff;}
+.btn-success:hover{background:var(--green-hover);box-shadow:0 2px 8px rgba(92,124,94,.25);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{background:#fff;color:var(--text);border-color:var(--light-muted);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none !important;}
+.btn-sm{padding:6px 14px;font-size:12px;}
+
+/* ── Keywords ── */
+.keyword-tag{display:inline-block;padding:4px 12px;background:var(--accent);
+  color:var(--primary);border-radius:20px;font-size:12px;font-weight:500;margin:2px 3px 2px 0;}
+
+/* ── Book Table ── */
+.book-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+.book-table{width:100%;border-collapse:collapse;font-size:14px;}
+.book-table th{background:#faf7f2;padding:12px 10px;text-align:left;color:var(--muted);
+  font-weight:600;font-size:13px;border-bottom:2px solid var(--border);white-space:nowrap;}
+.book-table td{padding:11px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.book-table tbody tr{transition:background .15s;}
+.book-table tbody tr:hover{background:#fdf9f2;}
+.book-table .cb-col{width:44px;text-align:center;}
+.book-table input[type=checkbox]{width:17px;height:17px;cursor:pointer;accent-color:var(--primary);}
+.book-table .idx{color:var(--light-muted);font-size:12px;width:40px;text-align:center;}
+.book-table .title-col{font-weight:500;}
+.selected-count{padding:10px 0 4px;font-size:14px;color:var(--primary);font-weight:600;
+  display:flex;align-items:center;gap:8px;}
+.selected-count .badge{display:inline-flex;align-items:center;justify-content:center;
+  min-width:28px;height:28px;border-radius:14px;background:var(--primary);color:#fff;font-size:13px;padding:0 8px;}
+
+/* ── Pagination ── */
+.pagination{display:flex;gap:4px;justify-content:center;margin-top:16px;flex-wrap:wrap;align-items:center;}
+.pagination button{padding:6px 13px;border:1px solid var(--border);background:#fff;
+  border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;transition:all .15s;}
+.pagination button.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;}
+.pagination button:hover:not(.active):not(:disabled){background:var(--bg);border-color:var(--light-muted);}
+.pagination .page-info{font-size:12px;color:var(--muted);margin-left:8px;}
+
+/* ── Style Selector ── */
+.style-bar{display:flex;align-items:center;gap:10px;padding:10px 16px;
+  background:var(--bg);border-radius:8px;margin-bottom:12px;flex-wrap:wrap;}
+.style-bar label{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap;}
+.style-bar select{padding:6px 30px 6px 12px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;font-family:inherit;cursor:pointer;outline:none;background:#fff;}
+
+/* ── Mode Tabs ── */
+.mode-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px 8px 0 0;
+  background:var(--bg);overflow:hidden;}
+.mode-tab{padding:10px 24px;border:none;background:transparent;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--muted);transition:all .2s;font-family:inherit;
+  border-bottom:2px solid transparent;}
+.mode-tab.active{background:var(--card);color:var(--primary);border-bottom-color:var(--primary);}
+.mode-tab:hover:not(.active){color:var(--text);background:rgba(255,255,255,.5);}
+
+/* ── Preview / Editor ── */
+.preview-frame{width:100%;min-height:500px;border:1px solid var(--border);
+  border-top:none;border-radius:0 0 8px 8px;background:#fff;overflow:hidden;}
+.preview-frame iframe{width:100%;height:68vh;border:none;display:block;}
+.editor-area{width:100%;min-height:500px;padding:24px;border:1px solid var(--border);
+  border-top:none;border-radius:0 0 8px 8px;font-size:15px;
+  font-family:var(--font-body);line-height:1.9;resize:vertical;outline:none;
+  background:#fefefd;display:none;}
+.editor-area:focus{border-color:var(--primary);box-shadow:inset 0 0 0 1px rgba(122,82,48,.1);}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:flex-start;}
+.toolbar textarea{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;min-height:72px;resize:vertical;font-family:inherit;outline:none;
+  background:#fefefd;transition:border .2s;}
+.toolbar textarea:focus{border-color:var(--primary);}
+.toolbar textarea::placeholder{color:var(--light-muted);}
+.export-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--accent);}
+
+/* ── Loading ── */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(245,240,232,.7);
+  z-index:998;justify-content:center;align-items:center;flex-direction:column;gap:16px;}
+.loading-overlay.active{display:flex;}
+.loading-overlay .spinner{width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;}
+.loading-overlay .text{font-size:14px;color:var(--muted);}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── Toast ── */
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#3c3732;
+  color:#fff;padding:12px 28px;border-radius:8px;font-size:14px;z-index:999;
+  opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+.toast.show{opacity:1;}
+.toast.error{background:var(--danger);}
+
+/* ── Step visibility ── */
+.step{display:none;}
+.step.active{display:block;}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+  .container{padding:12px;}
+  .card{padding:18px 16px;}
+  .header{padding:24px 0 20px;}
+  .header h1{font-size:24px;}
+  .form-row{flex-direction:column;}
+  .book-table{font-size:12px;}
+  .card-header{font-size:17px;}
+  .steps-indicator .si-label{display:none;}
+  .steps-indicator .si-line{width:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="logo-row">
+      <img id="header-logo" src="" alt="馆标" onerror="this.style.display='none'">
+    </div>
+    <h1>快哉荐读<span style="font-size:15px;font-weight:400;color:var(--muted);margin-left:8px;">agent v1.0</span></h1>
+    <div class="tagline">
+      <span>徐州市图书馆</span><span class="dot"></span>
+      <span>国潮汉风</span><span class="dot"></span>
+      <span>快哉荐读</span>
+    </div>
+  </div>
+
+  <!-- ── Steps Indicator ── -->
+  <div class="steps-indicator" id="steps-bar">
+    <div class="si-item active" id="si-1"><span class="si-num">1</span><span class="si-label">输入主题</span></div>
+    <div class="si-line" id="si-line-1"></div>
+    <div class="si-item" id="si-2"><span class="si-num">2</span><span class="si-label">选择书籍</span></div>
+    <div class="si-line" id="si-line-2"></div>
+    <div class="si-item" id="si-3"><span class="si-num">3</span><span class="si-label">审核导出</span></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ══════════ Step 1: Theme ══════════ -->
+  <div id="step-theme" class="card step active">
+    <div class="card-header"><span class="icon">&#x1F4DD;</span> 输入荐读主题</div>
+    <div class="form-row">
+      <input id="theme-input" type="text" placeholder="例如：端午节、文化遗产日、中国航天日..."
+             onkeydown="if(event.key==='Enter')searchBooks()" autofocus>
+      <select id="max-books">
+        <option value="8" selected>每期 8 本</option><option value="6">每期 6 本</option>
+        <option value="5">每期 5 本</option><option value="4">每期 4 本</option>
+      </select>
+      <select id="init-style">
+        <option value="elegant">典雅中国风</option>
+        <option value="minimal">现代简约</option>
+        <option value="fresh">清雅书香</option>
+        <option value="ink">水墨意境</option>
+      </select>
+      <button class="btn btn-primary" onclick="searchBooks()">&#x1F50E; 搜索书库</button>
+    </div>
+    <div id="keywords-area" style="margin-top:14px;"></div>
+    <div id="search-status" style="margin-top:8px;font-size:13px;color:var(--muted);"></div>
+  </div>
+
+  <!-- ══════════ Step 2: Book Selection ══════════ -->
+  <div id="step-select" class="card step">
+    <div class="card-header">
+      <span class="icon">&#x1F4DA;</span> 选择书籍
+      <span id="theme-display" style="font-weight:400;color:var(--muted);font-size:14px;"></span>
+    </div>
+    <div class="selected-count">
+      已选 <span class="badge" id="sel-count">0</span> / <span id="max-display">8</span> 本
+    </div>
+    <div class="book-table-wrap">
+      <table class="book-table">
+        <thead><tr><th class="cb-col"><input type="checkbox" id="select-all" onchange="toggleAll()"></th>
+          <th class="idx">序号</th><th>书名</th><th>责任者</th><th>索书号</th></tr></thead>
+        <tbody id="book-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="aiCurate()">&#x1F9E0; AI 智能精选</button>
+      <button class="btn btn-primary" onclick="confirmSelection()">&#x2714; 确认选择，生成荐读稿</button>
+      <button class="btn btn-ghost btn-sm" onclick="refreshResults()">&#x1F504; 刷新结果</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetAll()">重新搜索</button>
+    </div>
+  </div>
+
+  <!-- ══════════ Step 3: Preview ══════════ -->
+  <div id="step-preview" class="card step">
+    <div class="card-header">
+      <span class="icon">&#x1F50D;</span> 阅览审核
+      <span style="font-weight:400;color:var(--muted);font-size:14px;" id="preview-theme-label"></span>
+    </div>
+
+    <!-- Style bar -->
+    <div class="style-bar">
+      <label>页面风格</label>
+      <select id="style-select" onchange="changeStyle()">
+        <option value="elegant">典雅中国风</option>
+        <option value="minimal">现代简约</option>
+        <option value="fresh">清雅书香</option>
+        <option value="ink">水墨意境</option>
+      </select>
+      <span style="flex:1;"></span>
+      <span style="font-size:12px;color:var(--light-muted);">切换风格不改变文字内容</span>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-preview" onclick="switchMode('preview')">&#x1F441; 预览</button>
+      <button class="mode-tab" id="tab-edit" onclick="switchMode('edit')">&#x270F; 编辑</button>
+    </div>
+
+    <div class="preview-frame" id="preview-container">
+      <iframe id="preview-iframe" srcdoc="<div style='display:flex;align-items:center;justify-content:center;height:100%;color:#b8b0a6;font-size:15px;'>点击左侧「AI 智能精选」或手动勾选书籍后<br>点击「确认选择，生成荐读稿」</div>"></iframe>
+    </div>
+    <textarea class="editor-area" id="editor-area" placeholder="直接编辑荐读稿正文..."
+              oninput="onEditorChange()"></textarea>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <textarea id="feedback-input" placeholder="修改意见：例如'第一篇推荐理由太短，请扩充到200字'、'卷首语风格再温暖一些'..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="reviseArticle()">&#x1F4AC; AI 按意见修改重写</button>
+      <button class="btn btn-primary btn-sm" id="btn-apply-edit" onclick="applyEdit()" style="display:none;">&#x2714; 应用编辑</button>
+      <button class="btn btn-ghost" onclick="backToSelect()">&#x21A9; 重选书目</button>
+    </div>
+
+    <!-- Export -->
+    <div class="export-row">
+      <button class="btn btn-success" onclick="exportFile('html')">&#x1F4C4; 导出 HTML</button>
+      <button class="btn btn-success" onclick="exportFile('docx')">&#x1F4D8; 导出 Word</button>
+      <button class="btn btn-success" onclick="exportFile('md')">&#x1F4DD; 导出 Markdown</button>
+      <span style="flex:1;"></span>
+      <button class="btn btn-ghost btn-sm" onclick="resetAll()">开始新的荐读</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="text" id="loading-text">处理中...</div>
+</div>
+
+<script>
+// ── State ──
+let allBooks=[], selected=new Set(), currentPage=0, pageSize=10, maxBooks=8;
+let currentMode='preview', currentArticle='', hasEdit=false;
+
+function $(id){return document.getElementById(id);}
+function toast(msg,err){const e=$('toast');e.textContent=msg;e.className='toast'+(err?' error':'')+' show';setTimeout(()=>e.classList.remove('show'),3000);}
+function setLoading(txt){$('loading-text').textContent=txt||'处理中...';$('loading').classList.add('active');}
+function hideLoading(){$('loading').classList.remove('active');}
+
+function updateSteps(activeStep){
+  for(let i=1;i<=3;i++){
+    const item=$('si-'+i);
+    item.classList.remove('active','done');
+    if(i<activeStep) item.classList.add('done');
+    if(i===activeStep) item.classList.add('active');
+  }
+  ['step-theme','step-select','step-preview'].forEach((id,i)=>{
+    $(id).classList.toggle('active', i+1===activeStep);
+  });
+}
+
+function escHtml(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';}
+
+// ── Mode ──
+function switchMode(mode){
+  currentMode=mode;
+  $('tab-preview').classList.toggle('active',mode==='preview');
+  $('tab-edit').classList.toggle('active',mode==='edit');
+  $('preview-container').style.display=mode==='preview'?'block':'none';
+  $('editor-area').style.display=mode==='edit'?'block':'none';
+  $('btn-apply-edit').style.display=mode==='edit'?'inline-flex':'none';
+  if(mode==='edit') $('editor-area').value=currentArticle;
+}
+function onEditorChange(){hasEdit=true;currentArticle=$('editor-area').value;}
+
+// ── Step 1 ──
+async function searchBooks(){
+  const theme=$('theme-input').value.trim();
+  if(!theme){toast('请输入主题',true);return;}
+  maxBooks=parseInt($('max-books').value);
+  $('max-display').textContent=maxBooks;
+  selected.clear();setLoading('正在搜索馆藏书库...');
+  try{
+    const r=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    allBooks=d.books;currentPage=0;
+    $('search-status').textContent='找到 '+d.total+' 本候选书，请手动勾选或点「AI 智能精选」（最多 '+maxBooks+' 本）';
+    let kw='';(d.keywords||[]).slice(0,15).forEach(k=>kw+='<span class="keyword-tag">'+escHtml(k)+'</span>');
+    $('keywords-area').innerHTML=kw;
+    $('theme-display').textContent='主题：'+theme;
+    renderBookPage(0);updateSteps(2);hideLoading();
+  }catch(e){toast('搜索失败: '+e.message,true);hideLoading();}
+}
+
+// ── Step 2 ──
+function renderBookPage(page){
+  currentPage=page;const start=page*pageSize,end=Math.min(start+pageSize,allBooks.length);
+  let h='';
+  for(let i=start;i<end;i++){
+    const b=allBooks[i];
+    h+='<tr><td class="cb-col"><input type="checkbox"'+(selected.has(i)?' checked':'')+
+      ' onchange="toggleBook('+i+',this.checked)"></td><td class="idx">'+(i+1)+'</td>'+
+      '<td class="title-col">《'+escHtml(b.title)+'》</td><td>'+escHtml(b.author)+'</td><td>'+escHtml(b.call_no)+'</td></tr>';
+  }
+  $('book-tbody').innerHTML=h||'<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--light-muted);">无匹配书籍，请尝试其他主题</td></tr>';
+  const tp=Math.ceil(allBooks.length/pageSize);
+  let p='<button '+(page===0?'disabled':'')+' onclick="renderBookPage('+(page-1)+')">&#x25C0; 上一页</button>';
+  for(let i=0;i<tp;i++)p+='<button class="'+(i===page?'active':'')+'" onclick="renderBookPage('+i+')">'+(i+1)+'</button>';
+  p+='<button '+(page>=tp-1?'disabled':'')+' onclick="renderBookPage('+(page+1)+')">下一页 &#x25B6;</button>';
+  if(tp>0)p+='<span class="page-info">共 '+tp+' 页 '+allBooks.length+' 本</span>';
+  $('pagination').innerHTML=p;updateCount();
+}
+function toggleBook(i,c){
+  if(c){if(selected.size>=maxBooks){toast('最多选'+maxBooks+'本',true);renderBookPage(currentPage);return}selected.add(i);}
+  else selected.delete(i);
+  renderBookPage(currentPage);
+}
+function toggleAll(){
+  const s=$('select-all').checked,st=currentPage*pageSize,end=Math.min(st+pageSize,allBooks.length);
+  for(let i=st;i<end;i++){if(s&&selected.size>=maxBooks)break;s?selected.add(i):selected.delete(i);}
+  renderBookPage(currentPage);
+}
+function updateCount(){$('sel-count').textContent=selected.size;}
+
+async function aiCurate(){
+  setLoading('AI 正在精选最佳书目...');
+  try{
+    const r=await fetch('/api/curate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({indices:[],max:maxBooks})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    selected.clear();
+    (d.selected||[]).forEach(s=>{const i=allBooks.findIndex(b=>b.title===s.title);if(i>=0)selected.add(i);});
+    renderBookPage(0);toast('AI 精选完成，已选 '+selected.size+' 本');hideLoading();
+  }catch(e){toast('AI 精选失败: '+e.message,true);hideLoading();}
+}
+
+// ── Step 3 ──
+async function confirmSelection(){
+  if(selected.size===0){toast('请至少选 1 本书',true);return;}
+  const style=$('init-style').value;
+  setLoading('正在生成荐读稿...');
+  try{
+    const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({indices:Array.from(selected),max:maxBooks,style})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    currentArticle=d.article||'';hasEdit=false;
+    $('preview-iframe').srcdoc=d.html;
+    $('style-select').value=style;$('editor-area').value=currentArticle;
+    switchMode('preview');updateSteps(3);hideLoading();
+    toast('荐读稿已生成，请审核');
+  }catch(e){toast('生成失败: '+e.message,true);hideLoading();}
+}
+
+async function changeStyle(){
+  const style=$('style-select').value;setLoading('切换风格中...');
+  try{
+    const r=await fetch('/api/style',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({style})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    if(currentMode==='preview') $('preview-iframe').srcdoc=d.html;
+    hideLoading();toast('风格已切换为 '+$('style-select').selectedOptions[0].text);
+  }catch(e){toast('切换失败: '+e.message,true);hideLoading();}
+}
+
+async function reviseArticle(){
+  const fb=$('feedback-input').value.trim();
+  if(!fb){toast('请输入修改意见',true);return;}
+  setLoading('正在按意见修改...');
+  try{
+    const r=await fetch('/api/revise',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({feedback:fb})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    currentArticle=d.article||'';hasEdit=false;
+    $('preview-iframe').srcdoc=d.html;$('editor-area').value=currentArticle;
+    $('feedback-input').value='';switchMode('preview');hideLoading();
+    toast('已按意见修改，请再次审核');
+  }catch(e){toast('修改失败: '+e.message,true);hideLoading();}
+}
+
+async function applyEdit(){
+  const text=$('editor-area').value.trim();
+  if(!text){toast('文本不能为空',true);return;}
+  setLoading('应用编辑...');
+  try{
+    const r=await fetch('/api/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    currentArticle=text;hasEdit=false;
+    $('preview-iframe').srcdoc=d.html;switchMode('preview');hideLoading();
+    toast('编辑已应用');
+  }catch(e){toast('应用失败: '+e.message,true);hideLoading();}
+}
+
+function backToSelect(){updateSteps(2);renderBookPage(currentPage);}
+function exportFile(fmt){window.open('/api/export/'+fmt,'_blank');}
+
+async function refreshResults(){
+  selected.clear();setLoading('正在刷新搜索结果...');
+  try{
+    const r=await fetch('/api/refresh',{method:'POST',headers:{'Content-Type':'application/json'}});
+    const d=await r.json();
+    if(d.error){toast(d.error,true);hideLoading();return;}
+    allBooks=d.books;currentPage=0;
+    let kw='';(d.keywords||[]).slice(0,15).forEach(k=>kw+='<span class="keyword-tag">'+escHtml(k)+'</span>');
+    $('keywords-area').innerHTML=kw;
+    $('search-status').textContent='刷新完成，找到 '+d.total+' 本候选书';
+    renderBookPage(0);hideLoading();
+    toast(d.total>0?'刷新成功，找到 '+d.total+' 本':'未找到匹配书籍，请尝试其他主题');
+  }catch(e){toast('刷新失败: '+e.message,true);hideLoading();}
+}
+
+async function resetAll(){
+  selected.clear();allBooks=[];currentPage=0;currentArticle='';hasEdit=false;
+  $('preview-iframe').srcdoc='';$('editor-area').value='';$('feedback-input').value='';
+  await fetch('/api/reset',{method:'POST'});updateSteps(1);$('theme-input').focus();
+}
+
+// ── Init ──
+(function(){
+  const x=new XMLHttpRequest();x.open('GET','/api/logo');
+  x.onload=function(){if(x.status===200)$('header-logo').src=x.responseText;};x.send();
+})();
+</script>
+</body>
+</html>
